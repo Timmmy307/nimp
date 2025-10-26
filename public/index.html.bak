@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+        <head>
+                <meta charset="utf-8" />
+                <meta
+                        name="viewport"
+                        content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
+                />
+                <title>Aurora Gateway - Your Portal to the Free Web</title>
+
+                <link rel="shortcut icon" content="favicon.webp" />
+
+                <link rel="stylesheet" href="index.css" />
+                <script src="/scram/scramjet.all.js"></script>
+                <script src="baremux/index.js" defer></script>
+                <script src="epoxy/index.js" defer></script>
+                <script src="register-sw.js" defer></script>
+                <script src="search.js" defer></script>
+                <script src="index.js" defer></script>
+        </head>
+
+        <body>
+                <div class="branding-container">
+                        <h1 class="aurora-title">Aurora Gateway</h1>
+                        <p class="aurora-tagline">Your Portal to the Free Web</p>
+                </div>
+
+                <form id="sj-form" class="flex-center">
+                        <input
+                                id="sj-search-engine"
+                                value="https://duckduckgo.com/html/?q=%s"
+                                type="hidden"
+                        />
+                        <input id="sj-address" type="text" placeholder="Search the web freely" />
+                </form>
+                <div class="desc left-margin">
+                        <p id="sj-error"></p>
+                        <pre id="sj-error-code"></pre>
+                </div>
+                <iframe style="display: none" id="sj-frame"></iframe>
+        </body>
+</html>

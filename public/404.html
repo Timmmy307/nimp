@@ -1,23 +1,61 @@
-<!doctype html>
-<html>
-	<head>
-		<meta charset="utf-8" />
-		<meta
-			name="viewport"
-			content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
-		/>
-		<title>Aurora | Error</title>
-		<base href="/" />
-		<link rel="shortcut icon" content="favicon.ico" />
-		<link rel="stylesheet" href="index.css" />
-	</head>
+<!DOCTYPE html>
 
-	<body>
-		<div class="logo-wrapper left-margin">
-			<h1>Aurora | Error</h1>
-		</div>
-		<div class="desc left-margin">
-			<p>We could not route your request.</p>
-		</div>
-	</body>
+<html>
+<head><script>(function () {
+  function hasValidCookie() {
+    const cookies = document.cookie.split("; ").map(c => c.trim());
+    const accessCookie = cookies.find(c => c.startsWith("access="));
+    if (!accessCookie) return false;
+    const parts = accessCookie.split("=");
+    if (parts.length < 2) return false;
+    // cookie format: access=1|<ISO expiry>
+    const val = parts[1];
+    const match = val.match(/\|(.*)$/);
+    if (!match) return true; // if no expiry encoded, assume permanent
+    const expiry = new Date(match[1]);
+    return expiry > new Date();
+  }
+  if (!hasValidCookie()) {
+    window.location.replace("/sorry.html");
+  }
+})();</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport"/>
+<title>Aurora | Error</title>
+<base href="/"/>
+<link content="favicon.ico" rel="shortcut icon"/>
+<link href="index.css" rel="stylesheet"/>
+<script>function recheckCookie() {
+  function hasValidCookie() {
+    const cookies = document.cookie.split("; ").map(c => c.trim());
+    const accessCookie = cookies.find(c => c.startsWith("access="));
+    if (!accessCookie) return false;
+    const parts = accessCookie.split("=");
+    if (parts.length < 2) return false;
+    const val = parts[1];
+    const match = val.match(/\|(.*)$/);
+    if (!match) return true;
+    const expiry = new Date(match[1]);
+    return expiry > new Date();
+  }
+  if (!hasValidCookie()) {
+    window.location.replace("/sorry.html");
+  }
+}
+function scheduleRecheck() {
+  const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+  setTimeout(() => {
+    recheckCookie();
+    scheduleRecheck();
+  }, next);
+}
+scheduleRecheck();</script></head>
+<body>
+<div class="logo-wrapper left-margin">
+<h1>Aurora | Error</h1>
+</div>
+<div class="desc left-margin">
+<p>We could not route your request.</p>
+</div>
+</body>
 </html>

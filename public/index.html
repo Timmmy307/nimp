@@ -1,42 +1,73 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html>
-        <head>
-                <meta charset="utf-8" />
-                <meta
-                        name="viewport"
-                        content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
-                />
-                <title>Aurora Gateway - Your Portal to the Free Web</title>
-
-                <link rel="shortcut icon" content="favicon.webp" />
-
-                <link rel="stylesheet" href="index.css" />
-                <script src="/scram/scramjet.all.js"></script>
-                <script src="baremux/index.js" defer></script>
-                <script src="epoxy/index.js" defer></script>
-                <script src="register-sw.js" defer></script>
-                <script src="search.js" defer></script>
-                <script src="index.js" defer></script>
-        </head>
-
-        <body>
-                <div class="branding-container">
-                        <h1 class="aurora-title">Aurora Gateway</h1>
-                        <p class="aurora-tagline">Your Portal to the Free Web</p>
-                </div>
-
-                <form id="sj-form" class="flex-center">
-                        <input
-                                id="sj-search-engine"
-                                value="https://duckduckgo.com/html/?q=%s"
-                                type="hidden"
-                        />
-                        <input id="sj-address" type="text" placeholder="Search the web freely" />
-                </form>
-                <div class="desc left-margin">
-                        <p id="sj-error"></p>
-                        <pre id="sj-error-code"></pre>
-                </div>
-                <iframe style="display: none" id="sj-frame"></iframe>
-        </body>
+<head><script>(function () {
+  function hasValidCookie() {
+    const cookies = document.cookie.split("; ").map(c => c.trim());
+    const accessCookie = cookies.find(c => c.startsWith("access="));
+    if (!accessCookie) return false;
+    const parts = accessCookie.split("=");
+    if (parts.length < 2) return false;
+    // cookie format: access=1|<ISO expiry>
+    const val = parts[1];
+    const match = val.match(/\|(.*)$/);
+    if (!match) return true; // if no expiry encoded, assume permanent
+    const expiry = new Date(match[1]);
+    return expiry > new Date();
+  }
+  if (!hasValidCookie()) {
+    window.location.replace("/sorry.html");
+  }
+})();</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport"/>
+<title>Aurora Gateway - Your Portal to the Free Web</title>
+<link content="favicon.webp" rel="shortcut icon"/>
+<link href="index.css" rel="stylesheet"/>
+<script src="/scram/scramjet.all.js"></script>
+<script defer="" src="baremux/index.js"></script>
+<script defer="" src="epoxy/index.js"></script>
+<script defer="" src="register-sw.js"></script>
+<script defer="" src="search.js"></script>
+<script defer="" src="index.js"></script>
+<script>function recheckCookie() {
+  function hasValidCookie() {
+    const cookies = document.cookie.split("; ").map(c => c.trim());
+    const accessCookie = cookies.find(c => c.startsWith("access="));
+    if (!accessCookie) return false;
+    const parts = accessCookie.split("=");
+    if (parts.length < 2) return false;
+    const val = parts[1];
+    const match = val.match(/\|(.*)$/);
+    if (!match) return true;
+    const expiry = new Date(match[1]);
+    return expiry > new Date();
+  }
+  if (!hasValidCookie()) {
+    window.location.replace("/sorry.html");
+  }
+}
+function scheduleRecheck() {
+  const next = Math.floor(Math.random() * (25000 - 10000 + 1)) + 10000;
+  setTimeout(() => {
+    recheckCookie();
+    scheduleRecheck();
+  }, next);
+}
+scheduleRecheck();</script></head>
+<body>
+<div class="branding-container">
+<h1 class="aurora-title">Aurora Gateway</h1>
+<p class="aurora-tagline">Your Portal to the Free Web</p>
+</div>
+<form class="flex-center" id="sj-form">
+<input id="sj-search-engine" type="hidden" value="https://duckduckgo.com/html/?q=%s"/>
+<input id="sj-address" placeholder="Search the web freely" type="text"/>
+</form>
+<div class="desc left-margin">
+<p id="sj-error"></p>
+<pre id="sj-error-code"></pre>
+</div>
+<iframe id="sj-frame" style="display: none"></iframe>
+</body>
 </html>

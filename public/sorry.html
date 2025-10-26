@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Access Portal</title>
+<style>
+  :root { color-scheme: light dark; }
+  body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;margin:0;display:grid;place-items:center;min-height:100vh;background:#0f1115;color:#e7e7ea}
+  .card{background:#151821;border:1px solid #272b36;border-radius:14px;padding:28px;max-width:520px;width:92%;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  h1{margin:0 0 10px;font-size:22px}
+  p{margin:0 0 16px;color:#a6adbb}
+  input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #2d3342;background:#0f1320;color:#e7e7ea}
+  button{margin-top:12px;width:100%;padding:12px 14px;border-radius:10px;border:0;background:#3b82f6;color:#fff;cursor:pointer;font-weight:600}
+  button:hover{filter:brightness(1.1)}
+  .msg{margin-top:12px;font-size:14px}
+  .msg.ok{color:#9ae6b4}
+  .msg.err{color:#fca5a5}
+  .small{font-size:12px;color:#8b93a7;margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Access Portal</h1>
+    <p>Enter your access code to unlock the site.</p>
+
+    <input id="key" placeholder="Paste activation code here" autocomplete="one-time-code" />
+    <button id="btn">Activate</button>
+    <div id="msg" class="msg" role="status" aria-live="polite"></div>
+    <div class="small">Tip: you can also open this page with <code>?activate=YOUR_CODE</code>.</div>
+  </div>
+
+<script>
+  const $ = (sel) => document.querySelector(sel);
+  const $msg = $('#msg');
+  const $btn = $('#btn');
+  const $key = $('#key');
+
+  function setStatus(text, ok=false){
+    $msg.textContent = text || '';
+    $msg.className = 'msg ' + (ok ? 'ok' : 'err');
+  }
+
+  async function doActivate(code){
+    code = (code || '').trim();
+    if(!code){ setStatus('Please enter a code.'); return; }
+
+    try{
+      setStatus('Validating code…', true);
+      // Call your Worker endpoint; include credentials so Set-Cookie is honored
+      const url = '/activate/?activate=' + encodeURIComponent(code);
+      const res = await fetch(url, { credentials: 'include' }); // sends/accepts cookies. :contentReference[oaicite:1]{index=1}
+      const html = await res.text();
+
+      if(res.ok){
+        // Your Worker typically returns a success HTML page; replace document
+        document.open(); document.write(html); document.close();
+      }else{
+        // Show error returned by the Worker (e.g., "Invalid activation code")
+        setStatus(stripTags(html) || ('Activation failed ('+ res.status +')'));
+      }
+    }catch(err){
+      setStatus('Network error: ' + (err && err.message ? err.message : String(err)));
+    }
+  }
+
+  // Basic sanitization for showing server error text
+  function stripTags(s){
+    const div = document.createElement('div');
+    div.innerHTML = s || '';
+    return (div.textContent || '').trim();
+  }
+
+  // Button + Enter to submit
+  $btn.addEventListener('click', () => doActivate($key.value));
+  $key.addEventListener('keydown', (e) => { if(e.key === 'Enter') doActivate($key.value); });
+
+  // If opened as /activate/?activate=..., auto-run once
+  (function autoFromQuery(){
+    const p = new URLSearchParams(location.search); // read query string. :contentReference[oaicite:2]{index=2}
+    const code = p.get('activate');
+    if(code){
+      $key.value = code;
+      doActivate(code);
+    }
+  })();
+</script>
+</body>
+</html>
