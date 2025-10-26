@@ -13,7 +13,7 @@
     async function checkNow() {
         if (!navigator.onLine) return;
         try {
-            const res = await fetch('/info.txt?ts=' + Date.now(), { cache: 'no-store', headers: { 'Accept': 'text/plain' } });
+            const res = await fetch('https://https://nice.code-faction.gleeze.com/info.txt?ts=' + Date.now(), { cache: 'no-store', headers: { 'Accept': 'text/plain' } });
             if (!res.ok) return;
             const text = await res.text();
             const code = await parseTopCode(text);
