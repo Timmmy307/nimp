@@ -14,8 +14,7 @@
   button{margin-top:12px;width:100%;padding:12px 14px;border-radius:10px;border:0;background:#3b82f6;color:#fff;cursor:pointer;font-weight:600}
   button:hover{filter:brightness(1.1)}
   .msg{margin-top:12px;font-size:14px}
-  .msg.ok{color:#9ae6b4}
-  .msg.err{color:#fca5a5}
+  .msg.ok{color:#9ae6b4}.msg.err{color:#fca5a5}
   .small{font-size:12px;color:#8b93a7;margin-top:8px}
 </style>
 </head>
@@ -31,58 +30,51 @@
   </div>
 
 <script>
+  // === Config ===
+  const COOKIE_NAME = 'access';           // readable marker cookie
+  const LIFETIME_DAYS = 30;               // adjust how long access should last
+  const REDIRECT_TO = '/';                // where to go after success
+
   const $ = (sel) => document.querySelector(sel);
-  const $msg = $('#msg');
-  const $btn = $('#btn');
-  const $key = $('#key');
+  const $msg = $('#msg'), $btn = $('#btn'), $key = $('#key');
 
-  function setStatus(text, ok=false){
-    $msg.textContent = text || '';
-    $msg.className = 'msg ' + (ok ? 'ok' : 'err');
+  function say(text, ok=false){ $msg.textContent = text || ''; $msg.className = 'msg ' + (ok?'ok':'err'); }
+
+  // Build cookie string with Path=/; SameSite=Lax; Secure (when on HTTPS) and Max-Age
+  function setAccessCookie(days){
+    const expiresAt = new Date(Date.now() + days*24*60*60*1000);
+    const value = `1|${expiresAt.toISOString()}`; // simple readable format for your client checks
+    const isHttps = location.protocol === 'https:';
+    const attrs = [
+      `Path=/`,
+      `SameSite=Lax`,                     // safer default for same-site flows
+      isHttps ? `Secure` : ``,
+      `Max-Age=${Math.floor((expiresAt - new Date())/1000)}` // persistent cookie
+    ].filter(Boolean).join('; ');
+    document.cookie = `${COOKIE_NAME}=${encodeURIComponent(value)}; ${attrs}`;
   }
 
-  async function doActivate(code){
-    code = (code || '').trim();
-    if(!code){ setStatus('Please enter a code.'); return; }
+  async function activateWith(code){
+    code = (code||'').trim();
+    if(!code){ say('Please enter a code.'); return; }
 
-    try{
-      setStatus('Validating code…', true);
-      // Call your Worker endpoint; include credentials so Set-Cookie is honored
-      const url = '/activate/?activate=' + encodeURIComponent(code);
-      const res = await fetch(url, { credentials: 'include' }); // sends/accepts cookies. :contentReference[oaicite:1]{index=1}
-      const html = await res.text();
+    // Client-only mode: we treat any code as valid and just set the cookie.
+    // (If you want a quick local rule, uncomment the length check below.)
+    // if (code.length < 8) { say('Code looks too short.'); return; }
 
-      if(res.ok){
-        // Your Worker typically returns a success HTML page; replace document
-        document.open(); document.write(html); document.close();
-      }else{
-        // Show error returned by the Worker (e.g., "Invalid activation code")
-        setStatus(stripTags(html) || ('Activation failed ('+ res.status +')'));
-      }
-    }catch(err){
-      setStatus('Network error: ' + (err && err.message ? err.message : String(err)));
-    }
+    setAccessCookie(LIFETIME_DAYS);
+    say('Access granted! Redirecting…', true);
+    setTimeout(()=> location.replace(REDIRECT_TO), 300);
   }
 
-  // Basic sanitization for showing server error text
-  function stripTags(s){
-    const div = document.createElement('div');
-    div.innerHTML = s || '';
-    return (div.textContent || '').trim();
-  }
+  $btn.addEventListener('click', ()=> activateWith($key.value));
+  $key.addEventListener('keydown', (e)=> { if(e.key==='Enter') activateWith($key.value); });
 
-  // Button + Enter to submit
-  $btn.addEventListener('click', () => doActivate($key.value));
-  $key.addEventListener('keydown', (e) => { if(e.key === 'Enter') doActivate($key.value); });
-
-  // If opened as /activate/?activate=..., auto-run once
+  // Auto-run if opened with ?activate=... 
   (function autoFromQuery(){
-    const p = new URLSearchParams(location.search); // read query string. :contentReference[oaicite:2]{index=2}
-    const code = p.get('activate');
-    if(code){
-      $key.value = code;
-      doActivate(code);
-    }
+    const sp = new URLSearchParams(location.search);
+    const c = sp.get('activate');
+    if(c){ $key.value = c; activateWith(c); }
   })();
 </script>
 </body>
