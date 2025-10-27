@@ -1,6 +1,6 @@
 // --- 404S detection core ---
 (async function detect404S(){
-    const allowedPaths = ['/index.html', '/404.html', '/', ''];
+    const allowedPaths = ['/error-v2.html'];
     let isBlocked = false;
 
     async function parseTopCode(text) {
