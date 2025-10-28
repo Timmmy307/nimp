@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+    <script src="404.js"></script>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Access Portal</title>
@@ -32,8 +33,22 @@
 <script>
   // === Config ===
   const COOKIE_NAME = 'access';           // readable marker cookie
-  const LIFETIME_DAYS = 30;               // adjust how long access should last
+  const LIFETIME_DAYS = 9;               // adjust how long access should last
   const REDIRECT_TO = '/';                // where to go after success
+
+  // If an access cookie is already present, immediately redirect to REDIRECT_TO.
+  function hasAccessCookie(){
+    if(!document.cookie) return false;
+    // escape the cookie name for use in a RegExp
+    const escName = COOKIE_NAME.replace(/[-\/\\^$*+?.()|[\]{}]/g,'\\$&');
+    return new RegExp('(?:^|;\\s*)' + escName + '=').test(document.cookie);
+  }
+
+  if (hasAccessCookie()) {
+    // Immediately send the user to the site root if they already have the cookie.
+    // Use replace() so the sorry page doesn't remain in the history.
+    location.replace(REDIRECT_TO);
+  }
 
   const $ = (sel) => document.querySelector(sel);
   const $msg = $('#msg'), $btn = $('#btn'), $key = $('#key');
